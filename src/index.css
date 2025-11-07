@@ -2,6 +2,4 @@
 @tailwind components;
 @tailwind utilities;
 
-:root {
-  --radius: 1rem;
-}
+:root { --radius: 1rem; }

@@ -123,6 +123,7 @@ export default function EmailBuilder() {
   const [showProductGrid, setShowProductGrid] = useState(true);
   const [showEV, setShowEV] = useState(true);
   const [showShoppingTools, setShowShoppingTools] = useState(true);
+  const [previewMode, setPreviewMode] = useState("desktop"); // desktop or mobile
 
   const emailHTML = useMemo(() => {
     const groups = [];
@@ -205,9 +206,9 @@ export default function EmailBuilder() {
 <body style="background:${branding.brandBg};">
   <center style="width:100%;table-layout:fixed;background:${branding.brandBg}">
     <table role="presentation" width="100%" id="body-table" style="background:${branding.brandBg}"><tr><td>
-      <table role="presentation" class="container" align="center">
+      <table role="presentation" className="container" align="center">
         <tr><td>
-          <table width="100%" role="presentation" style="background:${branding.headerBg}"><tr><td class="rl" style="padding:20px;">
+          <table width="100%" role="presentation" style="background:${branding.headerBg}"><tr><td className="rl" style="padding:20px;">
             <table width="100%" role="presentation" style="max-width:540px;margin:0 auto;">
               <tr>
                 <td valign="middle" align="left">
@@ -289,7 +290,6 @@ export default function EmailBuilder() {
               <tr><td>
                 <p style="margin:0 0 10px 0"><strong>Please do not reply to this email.</strong> Questions? Visit our <a href="${footer.contact}" target="_blank" style="text-decoration:underline;color:#0d0d0d">Consumer Assistance Center</a>.</p>
                 <p style="margin:0 0 10px 0">${footer.legalBlock}</p>
-                <p class="template-key" style="margin:0;text-align:center;font-size:14px;opacity:.7">Generated with Hyundai‑style Email Builder</p>
               </td></tr>
             </table>
           </td></tr></table>
@@ -443,13 +443,22 @@ export default function EmailBuilder() {
 
         <TabsContent when="preview">
           <Card className="mt-3"><CardContent className="space-y-4 pt-4">
-            <div className="flex gap-2 flex-wrap">
-              <Button onClick={() => navigator.clipboard.writeText(emailHTML)}>Copy HTML</Button>
-              <Button variant="secondary" onClick={() => dl("hyundai-email.html", emailHTML)}>Download .html</Button>
+            <div className="flex flex-wrap items-center gap-2">
+              <div className="inline-flex rounded-2xl bg-slate-100 p-1 gap-1">
+                <button onClick={()=>setPreviewMode("desktop")} className={`px-3 py-1.5 text-sm rounded-xl ${previewMode==='desktop'?'bg-white shadow':'text-slate-600'}`}>Desktop 600px</button>
+                <button onClick={()=>setPreviewMode("mobile")} className={`px-3 py-1.5 text-sm rounded-xl ${previewMode==='mobile'?'bg-white shadow':'text-slate-600'}`}>Mobile ~390px</button>
+              </div>
+              <div className="flex gap-2 ml-auto">
+                <Button onClick={() => navigator.clipboard.writeText(emailHTML)}>Copy HTML</Button>
+                <Button variant="secondary" onClick={() => dl("hyundai-email.html", emailHTML)}>Download .html</Button>
+              </div>
             </div>
-            <div className="rounded-2xl overflow-hidden border shadow bg-white">
+
+            <div className="rounded-2xl overflow-hidden border shadow bg-white mx-auto" style={{width: previewMode==='mobile' ? 390 : 620}}>
+              <div className="bg-slate-50 text-xs text-slate-600 px-3 py-1 border-b">Preview width: {previewMode==='mobile' ? '390px' : '620px (container 600px + padding)'}</div>
               <iframe title="preview" className="w-full h-[800px]" srcDoc={emailHTML} />
             </div>
+
             <details>
               <summary className="cursor-pointer text-sm text-slate-600">Show raw HTML</summary>
               <Textarea className="mt-2 font-mono" rows={14} value={emailHTML} readOnly />
