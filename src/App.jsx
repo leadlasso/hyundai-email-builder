@@ -157,14 +157,7 @@ export default function App() {
       pct = Math.max(20, Math.min(60, pct));
       setSplitWidth(pct);
     }
-    function onUp(){ 
-      if(dragging){
-        setDragging(false); 
-        const snaps = [25, 33, 40];
-        const nearest = snaps.reduce((a,b)=> Math.abs(b - splitWidth) < Math.abs(a - splitWidth) ? b : a, snaps[0]);
-        setSplitWidth(nearest);
-      }
-    }
+    function onUp(){ setDragging(false); }
     window.addEventListener("mousemove", onMove);
     window.addEventListener("mouseup", onUp);
     return () => {
@@ -384,11 +377,25 @@ export default function App() {
             {/* Left: resizable options */}
             <div className="space-y-3 min-w-[260px] max-w-[600px]" style={{width: `${splitWidth}%`}}>
               <Tabs defaultValue="content" className="w-full">
-                <TabsList>
-                  <TabsTrigger tab="content">Content</TabsTrigger>
-                  <TabsTrigger tab="branding">Brand & Layout</TabsTrigger>
-                  <TabsTrigger tab="modules">Modules</TabsTrigger>
-                </TabsList>
+                <div className="flex items-center justify-between">
+  <TabsList>
+    <TabsTrigger tab="content">Content</TabsTrigger>
+    <TabsTrigger tab="branding">Brand & Layout</TabsTrigger>
+    <TabsTrigger tab="modules">Modules</TabsTrigger>
+  </TabsList>
+  <div className="ml-2 text-xs text-slate-600 flex items-center gap-2">
+    <span>Options width</span>
+    <select
+      className="border border-slate-300 rounded-lg px-2 py-1 bg-white"
+      value={String(Math.round(splitWidth))}
+      onChange={(e)=>setSplitWidth(parseInt(e.target.value,10))}
+    >
+      <option value="25">25%</option>
+      <option value="50">50%</option>
+      <option value="75">75%</option>
+    </select>
+  </div>
+</div>
 
                 <TabsContent when="content">
                   <Card className="mt-3"><CardContent className="space-y-6 pt-4">
