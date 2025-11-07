@@ -18,38 +18,471 @@ const dl = (filename, text) => {
 };
 
 function Field({ label, children }) {
+  
   return (
-    <div className="space-y-1">
-      <Label className="text-sm text-slate-600">{label}</Label>
-      {children}
+    <div className="p-6 max-w-[1400px] mx-auto space-y-6">
+      <div className="flex items-center justify-between">
+        <div>
+          <h1 className="text-2xl font-semibold">Hyundai‑style Email Builder</h1>
+          <p className="text-sm text-slate-600">Brand‑correct, 600px table layout. Export full HTML compatible with Gmail/Outlook.</p>
+        </div>
+        <div className="flex items-center gap-3">
+          <span className="text-sm text-slate-600">Split view</span>
+          <button onClick={()=>setSplitView(!splitView)} className={`rounded-2xl px-3 py-1.5 text-sm border ${splitView?'bg-black text-white border-black':'bg-white text-black'}`}>
+            {splitView ? 'On' : 'Off'}
+          </button>
+        </div>
+      </div>
+
+      {splitView ? (
+        <div className="grid grid-cols-12 gap-4">
+          {/* Left: 25% options (tabs without preview) */}
+          <div className="col-span-12 lg:col-span-3 space-y-3">
+            <Tabs defaultValue="content" className="w-full">
+              <TabsList>
+                <TabsTrigger tab="content">Content</TabsTrigger>
+                <TabsTrigger tab="branding">Brand & Layout</TabsTrigger>
+                <TabsTrigger tab="modules">Modules</TabsTrigger>
+              </TabsList>
+
+              <TabsContent when="content">
+                <Card className="mt-3"><CardContent className="space-y-6 pt-4">
+                  <div className="grid md:grid-cols-2 gap-6">
+                    <Field label="Subject line">
+                      <Input value={meta.subjectLine} onChange={(e)=>setMeta({...meta, subjectLine:e.target.value})}/>
+                    </Field>
+                    <Field label="Preheader">
+                      <Input value={meta.preheader} onChange={(e)=>setMeta({...meta, preheader:e.target.value})}/>
+                    </Field>
+                  </div>
+
+                  <div className="grid md:grid-cols-3 gap-6">
+                    <Field label="Hero link URL">
+                      <Input value={hero.href} onChange={(e)=>setHero({...hero, href:e.target.value})}/>
+                    </Field>
+                    <Field label="Hero image URL">
+                      <Input value={hero.img} onChange={(e)=>setHero({...hero, img:e.target.value})}/>
+                    </Field>
+                    <Field label="Hero alt text">
+                      <Input value={hero.alt} onChange={(e)=>setHero({...hero, alt:e.target.value})}/>
+                    </Field>
+                  </div>
+
+                  <Field label="Intro paragraph (links to ‘website’ and ‘Instagram’ auto‑hyperlinked)">
+                    <Textarea rows={3} value={intro.copy} onChange={(e)=>setIntro({...intro, copy:e.target.value})}/>
+                  </Field>
+                  <div className="grid md:grid-cols-3 gap-6">
+                    <Field label="Website URL"><Input value={intro.websiteHref} onChange={(e)=>setIntro({...intro, websiteHref:e.target.value})}/></Field>
+                    <Field label="Instagram URL"><Input value={intro.instagramHref} onChange={(e)=>setIntro({...intro, instagramHref:e.target.value})}/></Field>
+                    <Field label="Closing line"><Input value={intro.closing} onChange={(e)=>setIntro({...intro, closing:e.target.value})}/></Field>
+                  </div>
+
+                  <div className="space-y-3">
+                    <div className="flex items-center justify-between">
+                      <Label className="font-semibold">Vehicle tiles</Label>
+                      <div className="text-xs text-slate-500">Add up to 9 (renders 3 per row)</div>
+                    </div>
+                    <div className="space-y-3">
+                      {vehicles.map((v, i) => (
+                        <VehicleRow
+                          key={i}
+                          idx={i}
+                          item={v}
+                          onChange={(nv) => {
+                            const copy = vehicles.slice();
+                            copy[i] = nv;
+                            setVehicles(copy);
+                          }}
+                          onRemove={() => {
+                            const copy = vehicles.slice();
+                            copy.splice(i, 1);
+                            setVehicles(copy);
+                          }}
+                        />
+                      ))}
+                      <Button
+                        onClick={() => setVehicles([...vehicles, { img: "", href: "" }])}
+                        className="w-full"
+                      >Add vehicle</Button>
+                    </div>
+                  </div>
+
+                  <div className="grid md:grid-cols-3 gap-6">
+                    <Field label="EV Headline image URL">
+                      <Input value={ev.headlineImg} onChange={(e)=>setEv({...ev, headlineImg:e.target.value})}/>
+                    </Field>
+                    <Field label="EV Banner image URL">
+                      <Input value={ev.bannerImg} onChange={(e)=>setEv({...ev, bannerImg:e.target.value})}/>
+                    </Field>
+                    <Field label="EV Banner link URL">
+                      <Input value={ev.bannerHref} onChange={(e)=>setEv({...ev, bannerHref:e.target.value})}/>
+                    </Field>
+                  </div>
+                </CardContent></Card>
+              </TabsContent>
+
+              <TabsContent when="branding">
+                <Card className="mt-3"><CardContent className="space-y-6 pt-4">
+                  <div className="grid md:grid-cols-3 gap-6">
+                    <Field label="Logo URL"><Input value={branding.logoUrl} onChange={(e)=>setBranding({...branding, logoUrl:e.target.value})}/></Field>
+                    <Field label="Logo width (px)"><Input type="number" value={branding.logoWidth} onChange={(e)=>setBranding({...branding, logoWidth:parseInt(e.target.value||'0',10)})}/></Field>
+                    <Field label="Brand page background"><Input value={branding.brandBg} onChange={(e)=>setBranding({...branding, brandBg:e.target.value})}/></Field>
+                  </div>
+                  <div className="grid md:grid-cols-3 gap-6">
+                    <Field label="Header background"><Input value={branding.headerBg} onChange={(e)=>setBranding({...branding, headerBg:e.target.value})}/></Field>
+                    <Field label="Link color"><Input value={branding.linkColor} onChange={(e)=>setBranding({...branding, linkColor:e.target.value})}/></Field>
+                    <Field label="Button BG"><Input value={branding.btnBg} onChange={(e)=>setBranding({...branding, btnBg:e.target.value})}/></Field>
+                  </div>
+                  <div className="grid md:grid-cols-3 gap-6">
+                    <Field label="Button text color"><Input value={branding.btnTextColor} onChange={(e)=>setBranding({...branding, btnTextColor:e.target.value})}/></Field>
+                  </div>
+
+                  <div className="grid md:grid-cols-2 gap-6">
+                    <Field label="Privacy URL"><Input value={footer.privacy} onChange={(e)=>setFooter({...footer, privacy:e.target.value})}/></Field>
+                    <Field label="Unsubscribe URL"><Input value={footer.unsubscribe} onChange={(e)=>setFooter({...footer, unsubscribe:e.target.value})}/></Field>
+                  </div>
+                  <Field label="Legal block">
+                    <Textarea rows={3} value={footer.legalBlock} onChange={(e)=>setFooter({...footer, legalBlock:e.target.value})}/>
+                  </Field>
+                </CardContent></Card>
+              </TabsContent>
+
+              <TabsContent when="modules">
+                <Card className="mt-3"><CardContent className="space-y-4 pt-4">
+                  <div className="flex items-center justify-between">
+                    <div className="space-y-1">
+                      <Label>Show product grid</Label>
+                      <div className="text-xs text-slate-500">3‑wide tiles built from your list</div>
+                    </div>
+                    <Switch checked={showProductGrid} onCheckedChange={setShowProductGrid} />
+                  </div>
+                  <div className="flex items-center justify-between">
+                    <div className="space-y-1"><Label>Show EV section</Label></div>
+                    <Switch checked={showEV} onCheckedChange={setShowEV} />
+                  </div>
+                  <div className="flex items-center justify-between">
+                    <div className="space-y-1"><Label>Show shopping tools</Label></div>
+                    <Switch checked={showShoppingTools} onCheckedChange={setShowShoppingTools} />
+                  </div>
+                </CardContent></Card>
+              </TabsContent>
+            </Tabs>
+          </div>
+
+          {/* Right: 75% preview */}
+          <div className="col-span-12 lg:col-span-9">
+
+          <Card className="mt-3"><CardContent className="space-y-4 pt-4">
+            <div className="flex flex-wrap items-center gap-2">
+              <div className="inline-flex rounded-2xl bg-slate-100 p-1 gap-1">
+                <button onClick={()=>setPreviewMode("desktop")} className={`px-3 py-1.5 text-sm rounded-xl ${previewMode==='desktop'?'bg-white shadow':'text-slate-600'}`}>Desktop 600px</button>
+                <button onClick={()=>setPreviewMode("mobile")} className={`px-3 py-1.5 text-sm rounded-xl ${previewMode==='mobile'?'bg-white shadow':'text-slate-600'}`}>Mobile ~390px</button>
+              </div>
+              <div className="flex gap-2 ml-auto">
+                <Button onClick={() => navigator.clipboard.writeText(emailHTML)}>Copy HTML</Button>
+                <Button variant="secondary" onClick={() => dl("hyundai-email.html", emailHTML)}>Download .html</Button>
+              </div>
+            </div>
+
+            <div className="rounded-2xl overflow-hidden border shadow bg-white mx-auto" style={{width: previewMode==='mobile' ? 390 : 620}}>
+              <div className="bg-slate-50 text-xs text-slate-600 px-3 py-1 border-b">Preview width: {previewMode==='mobile' ? '390px' : '620px (container 600px + padding)'}</div>
+              <iframe title="preview" className="w-full h-[800px]" srcDoc={emailHTML} />
+            </div>
+
+            <details>
+              <summary className="cursor-pointer text-sm text-slate-600">Show raw HTML</summary>
+              <Textarea className="mt-2 font-mono" rows={14} value={emailHTML} readOnly />
+            </details>
+          </CardContent></Card>
+
+          </div>
+        </div>
+      ) : (
+        <div>
+          <Tabs defaultValue="content" className="w-full">
+            <TabsList>
+              <TabsTrigger tab="content">Content</TabsTrigger>
+              <TabsTrigger tab="branding">Brand & Layout</TabsTrigger>
+              <TabsTrigger tab="modules">Modules</TabsTrigger>
+              <TabsTrigger tab="preview">Preview / Export</TabsTrigger>
+            </TabsList>
+
+            <TabsContent when="content">
+              
+            </TabsContent>
+
+            <TabsContent when="branding">
+              
+            </TabsContent>
+
+            <TabsContent when="modules">
+              
+            </TabsContent>
+
+            <TabsContent when="preview">
+
+          <Card className="mt-3"><CardContent className="space-y-4 pt-4">
+            <div className="flex flex-wrap items-center gap-2">
+              <div className="inline-flex rounded-2xl bg-slate-100 p-1 gap-1">
+                <button onClick={()=>setPreviewMode("desktop")} className={`px-3 py-1.5 text-sm rounded-xl ${previewMode==='desktop'?'bg-white shadow':'text-slate-600'}`}>Desktop 600px</button>
+                <button onClick={()=>setPreviewMode("mobile")} className={`px-3 py-1.5 text-sm rounded-xl ${previewMode==='mobile'?'bg-white shadow':'text-slate-600'}`}>Mobile ~390px</button>
+              </div>
+              <div className="flex gap-2 ml-auto">
+                <Button onClick={() => navigator.clipboard.writeText(emailHTML)}>Copy HTML</Button>
+                <Button variant="secondary" onClick={() => dl("hyundai-email.html", emailHTML)}>Download .html</Button>
+              </div>
+            </div>
+
+            <div className="rounded-2xl overflow-hidden border shadow bg-white mx-auto" style={{width: previewMode==='mobile' ? 390 : 620}}>
+              <div className="bg-slate-50 text-xs text-slate-600 px-3 py-1 border-b">Preview width: {previewMode==='mobile' ? '390px' : '620px (container 600px + padding)'}</div>
+              <iframe title="preview" className="w-full h-[800px]" srcDoc={emailHTML} />
+            </div>
+
+            <details>
+              <summary className="cursor-pointer text-sm text-slate-600">Show raw HTML</summary>
+              <Textarea className="mt-2 font-mono" rows={14} value={emailHTML} readOnly />
+            </details>
+          </CardContent></Card>
+
+            </TabsContent>
+          </Tabs>
+        </div>
+      )}
     </div>
   );
 }
 
 function VehicleRow({ idx, item, onChange, onRemove }) {
+  
   return (
-    <div className="grid grid-cols-12 gap-2 items-end">
-      <div className="col-span-5">
-        <Field label={`Vehicle ${idx + 1} image URL (200px wide ideal)`}>
-          <Input
-            value={item.img}
-            onChange={(e) => onChange({ ...item, img: e.target.value })}
-            placeholder="https://.../img-explore-elantra@2x.jpg"
-          />
-        </Field>
+    <div className="p-6 max-w-[1400px] mx-auto space-y-6">
+      <div className="flex items-center justify-between">
+        <div>
+          <h1 className="text-2xl font-semibold">Hyundai‑style Email Builder</h1>
+          <p className="text-sm text-slate-600">Brand‑correct, 600px table layout. Export full HTML compatible with Gmail/Outlook.</p>
+        </div>
+        <div className="flex items-center gap-3">
+          <span className="text-sm text-slate-600">Split view</span>
+          <button onClick={()=>setSplitView(!splitView)} className={`rounded-2xl px-3 py-1.5 text-sm border ${splitView?'bg-black text-white border-black':'bg-white text-black'}`}>
+            {splitView ? 'On' : 'Off'}
+          </button>
+        </div>
       </div>
-      <div className="col-span-5">
-        <Field label="Click‑through URL">
-          <Input
-            value={item.href}
-            onChange={(e) => onChange({ ...item, href: e.target.value })}
-            placeholder="https://www.hyundaiusa.com/us/en/vehicles/elantra"
-          />
-        </Field>
-      </div>
-      <div className="col-span-2 flex items-end justify-end gap-2 pb-1">
-        <Button variant="secondary" onClick={onRemove}>Remove</Button>
-      </div>
+
+      {splitView ? (
+        <div className="grid grid-cols-12 gap-4">
+          {/* Left: 25% options (tabs without preview) */}
+          <div className="col-span-12 lg:col-span-3 space-y-3">
+            <Tabs defaultValue="content" className="w-full">
+              <TabsList>
+                <TabsTrigger tab="content">Content</TabsTrigger>
+                <TabsTrigger tab="branding">Brand & Layout</TabsTrigger>
+                <TabsTrigger tab="modules">Modules</TabsTrigger>
+              </TabsList>
+
+              <TabsContent when="content">
+                <Card className="mt-3"><CardContent className="space-y-6 pt-4">
+                  <div className="grid md:grid-cols-2 gap-6">
+                    <Field label="Subject line">
+                      <Input value={meta.subjectLine} onChange={(e)=>setMeta({...meta, subjectLine:e.target.value})}/>
+                    </Field>
+                    <Field label="Preheader">
+                      <Input value={meta.preheader} onChange={(e)=>setMeta({...meta, preheader:e.target.value})}/>
+                    </Field>
+                  </div>
+
+                  <div className="grid md:grid-cols-3 gap-6">
+                    <Field label="Hero link URL">
+                      <Input value={hero.href} onChange={(e)=>setHero({...hero, href:e.target.value})}/>
+                    </Field>
+                    <Field label="Hero image URL">
+                      <Input value={hero.img} onChange={(e)=>setHero({...hero, img:e.target.value})}/>
+                    </Field>
+                    <Field label="Hero alt text">
+                      <Input value={hero.alt} onChange={(e)=>setHero({...hero, alt:e.target.value})}/>
+                    </Field>
+                  </div>
+
+                  <Field label="Intro paragraph (links to ‘website’ and ‘Instagram’ auto‑hyperlinked)">
+                    <Textarea rows={3} value={intro.copy} onChange={(e)=>setIntro({...intro, copy:e.target.value})}/>
+                  </Field>
+                  <div className="grid md:grid-cols-3 gap-6">
+                    <Field label="Website URL"><Input value={intro.websiteHref} onChange={(e)=>setIntro({...intro, websiteHref:e.target.value})}/></Field>
+                    <Field label="Instagram URL"><Input value={intro.instagramHref} onChange={(e)=>setIntro({...intro, instagramHref:e.target.value})}/></Field>
+                    <Field label="Closing line"><Input value={intro.closing} onChange={(e)=>setIntro({...intro, closing:e.target.value})}/></Field>
+                  </div>
+
+                  <div className="space-y-3">
+                    <div className="flex items-center justify-between">
+                      <Label className="font-semibold">Vehicle tiles</Label>
+                      <div className="text-xs text-slate-500">Add up to 9 (renders 3 per row)</div>
+                    </div>
+                    <div className="space-y-3">
+                      {vehicles.map((v, i) => (
+                        <VehicleRow
+                          key={i}
+                          idx={i}
+                          item={v}
+                          onChange={(nv) => {
+                            const copy = vehicles.slice();
+                            copy[i] = nv;
+                            setVehicles(copy);
+                          }}
+                          onRemove={() => {
+                            const copy = vehicles.slice();
+                            copy.splice(i, 1);
+                            setVehicles(copy);
+                          }}
+                        />
+                      ))}
+                      <Button
+                        onClick={() => setVehicles([...vehicles, { img: "", href: "" }])}
+                        className="w-full"
+                      >Add vehicle</Button>
+                    </div>
+                  </div>
+
+                  <div className="grid md:grid-cols-3 gap-6">
+                    <Field label="EV Headline image URL">
+                      <Input value={ev.headlineImg} onChange={(e)=>setEv({...ev, headlineImg:e.target.value})}/>
+                    </Field>
+                    <Field label="EV Banner image URL">
+                      <Input value={ev.bannerImg} onChange={(e)=>setEv({...ev, bannerImg:e.target.value})}/>
+                    </Field>
+                    <Field label="EV Banner link URL">
+                      <Input value={ev.bannerHref} onChange={(e)=>setEv({...ev, bannerHref:e.target.value})}/>
+                    </Field>
+                  </div>
+                </CardContent></Card>
+              </TabsContent>
+
+              <TabsContent when="branding">
+                <Card className="mt-3"><CardContent className="space-y-6 pt-4">
+                  <div className="grid md:grid-cols-3 gap-6">
+                    <Field label="Logo URL"><Input value={branding.logoUrl} onChange={(e)=>setBranding({...branding, logoUrl:e.target.value})}/></Field>
+                    <Field label="Logo width (px)"><Input type="number" value={branding.logoWidth} onChange={(e)=>setBranding({...branding, logoWidth:parseInt(e.target.value||'0',10)})}/></Field>
+                    <Field label="Brand page background"><Input value={branding.brandBg} onChange={(e)=>setBranding({...branding, brandBg:e.target.value})}/></Field>
+                  </div>
+                  <div className="grid md:grid-cols-3 gap-6">
+                    <Field label="Header background"><Input value={branding.headerBg} onChange={(e)=>setBranding({...branding, headerBg:e.target.value})}/></Field>
+                    <Field label="Link color"><Input value={branding.linkColor} onChange={(e)=>setBranding({...branding, linkColor:e.target.value})}/></Field>
+                    <Field label="Button BG"><Input value={branding.btnBg} onChange={(e)=>setBranding({...branding, btnBg:e.target.value})}/></Field>
+                  </div>
+                  <div className="grid md:grid-cols-3 gap-6">
+                    <Field label="Button text color"><Input value={branding.btnTextColor} onChange={(e)=>setBranding({...branding, btnTextColor:e.target.value})}/></Field>
+                  </div>
+
+                  <div className="grid md:grid-cols-2 gap-6">
+                    <Field label="Privacy URL"><Input value={footer.privacy} onChange={(e)=>setFooter({...footer, privacy:e.target.value})}/></Field>
+                    <Field label="Unsubscribe URL"><Input value={footer.unsubscribe} onChange={(e)=>setFooter({...footer, unsubscribe:e.target.value})}/></Field>
+                  </div>
+                  <Field label="Legal block">
+                    <Textarea rows={3} value={footer.legalBlock} onChange={(e)=>setFooter({...footer, legalBlock:e.target.value})}/>
+                  </Field>
+                </CardContent></Card>
+              </TabsContent>
+
+              <TabsContent when="modules">
+                <Card className="mt-3"><CardContent className="space-y-4 pt-4">
+                  <div className="flex items-center justify-between">
+                    <div className="space-y-1">
+                      <Label>Show product grid</Label>
+                      <div className="text-xs text-slate-500">3‑wide tiles built from your list</div>
+                    </div>
+                    <Switch checked={showProductGrid} onCheckedChange={setShowProductGrid} />
+                  </div>
+                  <div className="flex items-center justify-between">
+                    <div className="space-y-1"><Label>Show EV section</Label></div>
+                    <Switch checked={showEV} onCheckedChange={setShowEV} />
+                  </div>
+                  <div className="flex items-center justify-between">
+                    <div className="space-y-1"><Label>Show shopping tools</Label></div>
+                    <Switch checked={showShoppingTools} onCheckedChange={setShowShoppingTools} />
+                  </div>
+                </CardContent></Card>
+              </TabsContent>
+            </Tabs>
+          </div>
+
+          {/* Right: 75% preview */}
+          <div className="col-span-12 lg:col-span-9">
+
+          <Card className="mt-3"><CardContent className="space-y-4 pt-4">
+            <div className="flex flex-wrap items-center gap-2">
+              <div className="inline-flex rounded-2xl bg-slate-100 p-1 gap-1">
+                <button onClick={()=>setPreviewMode("desktop")} className={`px-3 py-1.5 text-sm rounded-xl ${previewMode==='desktop'?'bg-white shadow':'text-slate-600'}`}>Desktop 600px</button>
+                <button onClick={()=>setPreviewMode("mobile")} className={`px-3 py-1.5 text-sm rounded-xl ${previewMode==='mobile'?'bg-white shadow':'text-slate-600'}`}>Mobile ~390px</button>
+              </div>
+              <div className="flex gap-2 ml-auto">
+                <Button onClick={() => navigator.clipboard.writeText(emailHTML)}>Copy HTML</Button>
+                <Button variant="secondary" onClick={() => dl("hyundai-email.html", emailHTML)}>Download .html</Button>
+              </div>
+            </div>
+
+            <div className="rounded-2xl overflow-hidden border shadow bg-white mx-auto" style={{width: previewMode==='mobile' ? 390 : 620}}>
+              <div className="bg-slate-50 text-xs text-slate-600 px-3 py-1 border-b">Preview width: {previewMode==='mobile' ? '390px' : '620px (container 600px + padding)'}</div>
+              <iframe title="preview" className="w-full h-[800px]" srcDoc={emailHTML} />
+            </div>
+
+            <details>
+              <summary className="cursor-pointer text-sm text-slate-600">Show raw HTML</summary>
+              <Textarea className="mt-2 font-mono" rows={14} value={emailHTML} readOnly />
+            </details>
+          </CardContent></Card>
+
+          </div>
+        </div>
+      ) : (
+        <div>
+          <Tabs defaultValue="content" className="w-full">
+            <TabsList>
+              <TabsTrigger tab="content">Content</TabsTrigger>
+              <TabsTrigger tab="branding">Brand & Layout</TabsTrigger>
+              <TabsTrigger tab="modules">Modules</TabsTrigger>
+              <TabsTrigger tab="preview">Preview / Export</TabsTrigger>
+            </TabsList>
+
+            <TabsContent when="content">
+              
+            </TabsContent>
+
+            <TabsContent when="branding">
+              
+            </TabsContent>
+
+            <TabsContent when="modules">
+              
+            </TabsContent>
+
+            <TabsContent when="preview">
+
+          <Card className="mt-3"><CardContent className="space-y-4 pt-4">
+            <div className="flex flex-wrap items-center gap-2">
+              <div className="inline-flex rounded-2xl bg-slate-100 p-1 gap-1">
+                <button onClick={()=>setPreviewMode("desktop")} className={`px-3 py-1.5 text-sm rounded-xl ${previewMode==='desktop'?'bg-white shadow':'text-slate-600'}`}>Desktop 600px</button>
+                <button onClick={()=>setPreviewMode("mobile")} className={`px-3 py-1.5 text-sm rounded-xl ${previewMode==='mobile'?'bg-white shadow':'text-slate-600'}`}>Mobile ~390px</button>
+              </div>
+              <div className="flex gap-2 ml-auto">
+                <Button onClick={() => navigator.clipboard.writeText(emailHTML)}>Copy HTML</Button>
+                <Button variant="secondary" onClick={() => dl("hyundai-email.html", emailHTML)}>Download .html</Button>
+              </div>
+            </div>
+
+            <div className="rounded-2xl overflow-hidden border shadow bg-white mx-auto" style={{width: previewMode==='mobile' ? 390 : 620}}>
+              <div className="bg-slate-50 text-xs text-slate-600 px-3 py-1 border-b">Preview width: {previewMode==='mobile' ? '390px' : '620px (container 600px + padding)'}</div>
+              <iframe title="preview" className="w-full h-[800px]" srcDoc={emailHTML} />
+            </div>
+
+            <details>
+              <summary className="cursor-pointer text-sm text-slate-600">Show raw HTML</summary>
+              <Textarea className="mt-2 font-mono" rows={14} value={emailHTML} readOnly />
+            </details>
+          </CardContent></Card>
+
+            </TabsContent>
+          </Tabs>
+        </div>
+      )}
     </div>
   );
 }
@@ -124,6 +557,7 @@ export default function EmailBuilder() {
   const [showEV, setShowEV] = useState(true);
   const [showShoppingTools, setShowShoppingTools] = useState(true);
   const [previewMode, setPreviewMode] = useState("desktop"); // desktop or mobile
+  const [splitView, setSplitView] = useState(true); // show 25% options / 75% preview
 
   const emailHTML = useMemo(() => {
     const groups = [];
@@ -302,146 +736,160 @@ export default function EmailBuilder() {
 </html>`;
   }, [branding, meta, hero, intro, vehicles, ev, shop, footer, showProductGrid, showEV, showShoppingTools]);
 
+  
   return (
-    <div className="p-6 max-w-[1200px] mx-auto space-y-6">
-      <h1 className="text-2xl font-semibold">Hyundai‑style Email Builder</h1>
-      <p className="text-sm text-slate-600">Brand‑correct, 600px table layout. Export full HTML compatible with Gmail/Outlook.</p>
+    <div className="p-6 max-w-[1400px] mx-auto space-y-6">
+      <div className="flex items-center justify-between">
+        <div>
+          <h1 className="text-2xl font-semibold">Hyundai‑style Email Builder</h1>
+          <p className="text-sm text-slate-600">Brand‑correct, 600px table layout. Export full HTML compatible with Gmail/Outlook.</p>
+        </div>
+        <div className="flex items-center gap-3">
+          <span className="text-sm text-slate-600">Split view</span>
+          <button onClick={()=>setSplitView(!splitView)} className={`rounded-2xl px-3 py-1.5 text-sm border ${splitView?'bg-black text-white border-black':'bg-white text-black'}`}>
+            {splitView ? 'On' : 'Off'}
+          </button>
+        </div>
+      </div>
 
-      <Tabs defaultValue="content" className="w-full">
-        <TabsList>
-          <TabsTrigger tab="content">Content</TabsTrigger>
-          <TabsTrigger tab="branding">Brand & Layout</TabsTrigger>
-          <TabsTrigger tab="modules">Modules</TabsTrigger>
-          <TabsTrigger tab="preview">Preview / Export</TabsTrigger>
-        </TabsList>
+      {splitView ? (
+        <div className="grid grid-cols-12 gap-4">
+          {/* Left: 25% options (tabs without preview) */}
+          <div className="col-span-12 lg:col-span-3 space-y-3">
+            <Tabs defaultValue="content" className="w-full">
+              <TabsList>
+                <TabsTrigger tab="content">Content</TabsTrigger>
+                <TabsTrigger tab="branding">Brand & Layout</TabsTrigger>
+                <TabsTrigger tab="modules">Modules</TabsTrigger>
+              </TabsList>
 
-        <TabsContent when="content">
-          <Card className="mt-3"><CardContent className="space-y-6 pt-4">
-            <div className="grid md:grid-cols-2 gap-6">
-              <Field label="Subject line">
-                <Input value={meta.subjectLine} onChange={(e)=>setMeta({...meta, subjectLine:e.target.value})}/>
-              </Field>
-              <Field label="Preheader">
-                <Input value={meta.preheader} onChange={(e)=>setMeta({...meta, preheader:e.target.value})}/>
-              </Field>
-            </div>
+              <TabsContent when="content">
+                <Card className="mt-3"><CardContent className="space-y-6 pt-4">
+                  <div className="grid md:grid-cols-2 gap-6">
+                    <Field label="Subject line">
+                      <Input value={meta.subjectLine} onChange={(e)=>setMeta({...meta, subjectLine:e.target.value})}/>
+                    </Field>
+                    <Field label="Preheader">
+                      <Input value={meta.preheader} onChange={(e)=>setMeta({...meta, preheader:e.target.value})}/>
+                    </Field>
+                  </div>
 
-            <div className="grid md:grid-cols-3 gap-6">
-              <Field label="Hero link URL">
-                <Input value={hero.href} onChange={(e)=>setHero({...hero, href:e.target.value})}/>
-              </Field>
-              <Field label="Hero image URL">
-                <Input value={hero.img} onChange={(e)=>setHero({...hero, img:e.target.value})}/>
-              </Field>
-              <Field label="Hero alt text">
-                <Input value={hero.alt} onChange={(e)=>setHero({...hero, alt:e.target.value})}/>
-              </Field>
-            </div>
+                  <div className="grid md:grid-cols-3 gap-6">
+                    <Field label="Hero link URL">
+                      <Input value={hero.href} onChange={(e)=>setHero({...hero, href:e.target.value})}/>
+                    </Field>
+                    <Field label="Hero image URL">
+                      <Input value={hero.img} onChange={(e)=>setHero({...hero, img:e.target.value})}/>
+                    </Field>
+                    <Field label="Hero alt text">
+                      <Input value={hero.alt} onChange={(e)=>setHero({...hero, alt:e.target.value})}/>
+                    </Field>
+                  </div>
 
-            <Field label="Intro paragraph (links to ‘website’ and ‘Instagram’ auto‑hyperlinked)">
-              <Textarea rows={3} value={intro.copy} onChange={(e)=>setIntro({...intro, copy:e.target.value})}/>
-            </Field>
-            <div className="grid md:grid-cols-3 gap-6">
-              <Field label="Website URL"><Input value={intro.websiteHref} onChange={(e)=>setIntro({...intro, websiteHref:e.target.value})}/></Field>
-              <Field label="Instagram URL"><Input value={intro.instagramHref} onChange={(e)=>setIntro({...intro, instagramHref:e.target.value})}/></Field>
-              <Field label="Closing line"><Input value={intro.closing} onChange={(e)=>setIntro({...intro, closing:e.target.value})}/></Field>
-            </div>
+                  <Field label="Intro paragraph (links to ‘website’ and ‘Instagram’ auto‑hyperlinked)">
+                    <Textarea rows={3} value={intro.copy} onChange={(e)=>setIntro({...intro, copy:e.target.value})}/>
+                  </Field>
+                  <div className="grid md:grid-cols-3 gap-6">
+                    <Field label="Website URL"><Input value={intro.websiteHref} onChange={(e)=>setIntro({...intro, websiteHref:e.target.value})}/></Field>
+                    <Field label="Instagram URL"><Input value={intro.instagramHref} onChange={(e)=>setIntro({...intro, instagramHref:e.target.value})}/></Field>
+                    <Field label="Closing line"><Input value={intro.closing} onChange={(e)=>setIntro({...intro, closing:e.target.value})}/></Field>
+                  </div>
 
-            <div className="space-y-3">
-              <div className="flex items-center justify-between">
-                <Label className="font-semibold">Vehicle tiles</Label>
-                <div className="text-xs text-slate-500">Add up to 9 (renders 3 per row)</div>
-              </div>
-              <div className="space-y-3">
-                {vehicles.map((v, i) => (
-                  <VehicleRow
-                    key={i}
-                    idx={i}
-                    item={v}
-                    onChange={(nv) => {
-                      const copy = vehicles.slice();
-                      copy[i] = nv;
-                      setVehicles(copy);
-                    }}
-                    onRemove={() => {
-                      const copy = vehicles.slice();
-                      copy.splice(i, 1);
-                      setVehicles(copy);
-                    }}
-                  />
-                ))}
-                <Button
-                  onClick={() => setVehicles([...vehicles, { img: "", href: "" }])}
-                  className="w-full"
-                >Add vehicle</Button>
-              </div>
-            </div>
+                  <div className="space-y-3">
+                    <div className="flex items-center justify-between">
+                      <Label className="font-semibold">Vehicle tiles</Label>
+                      <div className="text-xs text-slate-500">Add up to 9 (renders 3 per row)</div>
+                    </div>
+                    <div className="space-y-3">
+                      {vehicles.map((v, i) => (
+                        <VehicleRow
+                          key={i}
+                          idx={i}
+                          item={v}
+                          onChange={(nv) => {
+                            const copy = vehicles.slice();
+                            copy[i] = nv;
+                            setVehicles(copy);
+                          }}
+                          onRemove={() => {
+                            const copy = vehicles.slice();
+                            copy.splice(i, 1);
+                            setVehicles(copy);
+                          }}
+                        />
+                      ))}
+                      <Button
+                        onClick={() => setVehicles([...vehicles, { img: "", href: "" }])}
+                        className="w-full"
+                      >Add vehicle</Button>
+                    </div>
+                  </div>
 
-            <div className="grid md:grid-cols-3 gap-6">
-              <Field label="EV Headline image URL">
-                <Input value={ev.headlineImg} onChange={(e)=>setEv({...ev, headlineImg:e.target.value})}/>
-              </Field>
-              <Field label="EV Banner image URL">
-                <Input value={ev.bannerImg} onChange={(e)=>setEv({...ev, bannerImg:e.target.value})}/>
-              </Field>
-              <Field label="EV Banner link URL">
-                <Input value={ev.bannerHref} onChange={(e)=>setEv({...ev, bannerHref:e.target.value})}/>
-              </Field>
-            </div>
-          </CardContent></Card>
-        </TabsContent>
+                  <div className="grid md:grid-cols-3 gap-6">
+                    <Field label="EV Headline image URL">
+                      <Input value={ev.headlineImg} onChange={(e)=>setEv({...ev, headlineImg:e.target.value})}/>
+                    </Field>
+                    <Field label="EV Banner image URL">
+                      <Input value={ev.bannerImg} onChange={(e)=>setEv({...ev, bannerImg:e.target.value})}/>
+                    </Field>
+                    <Field label="EV Banner link URL">
+                      <Input value={ev.bannerHref} onChange={(e)=>setEv({...ev, bannerHref:e.target.value})}/>
+                    </Field>
+                  </div>
+                </CardContent></Card>
+              </TabsContent>
 
-        <TabsContent when="branding">
-          <Card className="mt-3"><CardContent className="space-y-6 pt-4">
-            <div className="grid md:grid-cols-3 gap-6">
-              <Field label="Logo URL"><Input value={branding.logoUrl} onChange={(e)=>setBranding({...branding, logoUrl:e.target.value})}/></Field>
-              <Field label="Logo width (px)"><Input type="number" value={branding.logoWidth} onChange={(e)=>setBranding({...branding, logoWidth:parseInt(e.target.value||"0",10)})}/></Field>
-              <Field label="Brand page background"><Input value={branding.brandBg} onChange={(e)=>setBranding({...branding, brandBg:e.target.value})}/></Field>
-            </div>
-            <div className="grid md:grid-cols-3 gap-6">
-              <Field label="Header background"><Input value={branding.headerBg} onChange={(e)=>setBranding({...branding, headerBg:e.target.value})}/></Field>
-              <Field label="Link color"><Input value={branding.linkColor} onChange={(e)=>setBranding({...branding, linkColor:e.target.value})}/></Field>
-              <Field label="Button BG"><Input value={branding.btnBg} onChange={(e)=>setBranding({...branding, btnBg:e.target.value})}/></Field>
-            </div>
-            <div className="grid md:grid-cols-3 gap-6">
-              <Field label="Button text color"><Input value={branding.btnTextColor} onChange={(e)=>setBranding({...branding, btnTextColor:e.target.value})}/></Field>
-            </div>
+              <TabsContent when="branding">
+                <Card className="mt-3"><CardContent className="space-y-6 pt-4">
+                  <div className="grid md:grid-cols-3 gap-6">
+                    <Field label="Logo URL"><Input value={branding.logoUrl} onChange={(e)=>setBranding({...branding, logoUrl:e.target.value})}/></Field>
+                    <Field label="Logo width (px)"><Input type="number" value={branding.logoWidth} onChange={(e)=>setBranding({...branding, logoWidth:parseInt(e.target.value||'0',10)})}/></Field>
+                    <Field label="Brand page background"><Input value={branding.brandBg} onChange={(e)=>setBranding({...branding, brandBg:e.target.value})}/></Field>
+                  </div>
+                  <div className="grid md:grid-cols-3 gap-6">
+                    <Field label="Header background"><Input value={branding.headerBg} onChange={(e)=>setBranding({...branding, headerBg:e.target.value})}/></Field>
+                    <Field label="Link color"><Input value={branding.linkColor} onChange={(e)=>setBranding({...branding, linkColor:e.target.value})}/></Field>
+                    <Field label="Button BG"><Input value={branding.btnBg} onChange={(e)=>setBranding({...branding, btnBg:e.target.value})}/></Field>
+                  </div>
+                  <div className="grid md:grid-cols-3 gap-6">
+                    <Field label="Button text color"><Input value={branding.btnTextColor} onChange={(e)=>setBranding({...branding, btnTextColor:e.target.value})}/></Field>
+                  </div>
 
-            <div className="grid md:grid-cols-2 gap-6">
-              <Field label="Privacy URL"><Input value={footer.privacy} onChange={(e)=>setFooter({...footer, privacy:e.target.value})}/></Field>
-              <Field label="Unsubscribe URL"><Input value={footer.unsubscribe} onChange={(e)=>setFooter({...footer, unsubscribe:e.target.value})}/></Field>
-            </div>
-            <Field label="Legal block">
-              <Textarea rows={3} value={footer.legalBlock} onChange={(e)=>setFooter({...footer, legalBlock:e.target.value})}/>
-            </Field>
-          </CardContent></Card>
-        </TabsContent>
+                  <div className="grid md:grid-cols-2 gap-6">
+                    <Field label="Privacy URL"><Input value={footer.privacy} onChange={(e)=>setFooter({...footer, privacy:e.target.value})}/></Field>
+                    <Field label="Unsubscribe URL"><Input value={footer.unsubscribe} onChange={(e)=>setFooter({...footer, unsubscribe:e.target.value})}/></Field>
+                  </div>
+                  <Field label="Legal block">
+                    <Textarea rows={3} value={footer.legalBlock} onChange={(e)=>setFooter({...footer, legalBlock:e.target.value})}/>
+                  </Field>
+                </CardContent></Card>
+              </TabsContent>
 
-        <TabsContent when="modules">
-          <Card className="mt-3"><CardContent className="space-y-4 pt-4">
-            <div className="flex items-center justify-between">
-              <div className="space-y-1">
-                <Label>Show product grid</Label>
-                <div className="text-xs text-slate-500">3‑wide tiles built from your list</div>
-              </div>
-              <Switch checked={showProductGrid} onCheckedChange={setShowProductGrid} />
-            </div>
-            <div className="flex items-center justify-between">
-              <div className="space-y-1">
-                <Label>Show EV section</Label>
-              </div>
-              <Switch checked={showEV} onCheckedChange={setShowEV} />
-            </div>
-            <div className="flex items-center justify-between">
-              <div className="space-y-1">
-                <Label>Show shopping tools</Label>
-              </div>
-              <Switch checked={showShoppingTools} onCheckedChange={setShowShoppingTools} />
-            </div>
-          </CardContent></Card>
-        </TabsContent>
+              <TabsContent when="modules">
+                <Card className="mt-3"><CardContent className="space-y-4 pt-4">
+                  <div className="flex items-center justify-between">
+                    <div className="space-y-1">
+                      <Label>Show product grid</Label>
+                      <div className="text-xs text-slate-500">3‑wide tiles built from your list</div>
+                    </div>
+                    <Switch checked={showProductGrid} onCheckedChange={setShowProductGrid} />
+                  </div>
+                  <div className="flex items-center justify-between">
+                    <div className="space-y-1"><Label>Show EV section</Label></div>
+                    <Switch checked={showEV} onCheckedChange={setShowEV} />
+                  </div>
+                  <div className="flex items-center justify-between">
+                    <div className="space-y-1"><Label>Show shopping tools</Label></div>
+                    <Switch checked={showShoppingTools} onCheckedChange={setShowShoppingTools} />
+                  </div>
+                </CardContent></Card>
+              </TabsContent>
+            </Tabs>
+          </div>
 
-        <TabsContent when="preview">
+          {/* Right: 75% preview */}
+          <div className="col-span-12 lg:col-span-9">
+
           <Card className="mt-3"><CardContent className="space-y-4 pt-4">
             <div className="flex flex-wrap items-center gap-2">
               <div className="inline-flex rounded-2xl bg-slate-100 p-1 gap-1">
@@ -464,8 +912,60 @@ export default function EmailBuilder() {
               <Textarea className="mt-2 font-mono" rows={14} value={emailHTML} readOnly />
             </details>
           </CardContent></Card>
-        </TabsContent>
-      </Tabs>
+
+          </div>
+        </div>
+      ) : (
+        <div>
+          <Tabs defaultValue="content" className="w-full">
+            <TabsList>
+              <TabsTrigger tab="content">Content</TabsTrigger>
+              <TabsTrigger tab="branding">Brand & Layout</TabsTrigger>
+              <TabsTrigger tab="modules">Modules</TabsTrigger>
+              <TabsTrigger tab="preview">Preview / Export</TabsTrigger>
+            </TabsList>
+
+            <TabsContent when="content">
+              
+            </TabsContent>
+
+            <TabsContent when="branding">
+              
+            </TabsContent>
+
+            <TabsContent when="modules">
+              
+            </TabsContent>
+
+            <TabsContent when="preview">
+
+          <Card className="mt-3"><CardContent className="space-y-4 pt-4">
+            <div className="flex flex-wrap items-center gap-2">
+              <div className="inline-flex rounded-2xl bg-slate-100 p-1 gap-1">
+                <button onClick={()=>setPreviewMode("desktop")} className={`px-3 py-1.5 text-sm rounded-xl ${previewMode==='desktop'?'bg-white shadow':'text-slate-600'}`}>Desktop 600px</button>
+                <button onClick={()=>setPreviewMode("mobile")} className={`px-3 py-1.5 text-sm rounded-xl ${previewMode==='mobile'?'bg-white shadow':'text-slate-600'}`}>Mobile ~390px</button>
+              </div>
+              <div className="flex gap-2 ml-auto">
+                <Button onClick={() => navigator.clipboard.writeText(emailHTML)}>Copy HTML</Button>
+                <Button variant="secondary" onClick={() => dl("hyundai-email.html", emailHTML)}>Download .html</Button>
+              </div>
+            </div>
+
+            <div className="rounded-2xl overflow-hidden border shadow bg-white mx-auto" style={{width: previewMode==='mobile' ? 390 : 620}}>
+              <div className="bg-slate-50 text-xs text-slate-600 px-3 py-1 border-b">Preview width: {previewMode==='mobile' ? '390px' : '620px (container 600px + padding)'}</div>
+              <iframe title="preview" className="w-full h-[800px]" srcDoc={emailHTML} />
+            </div>
+
+            <details>
+              <summary className="cursor-pointer text-sm text-slate-600">Show raw HTML</summary>
+              <Textarea className="mt-2 font-mono" rows={14} value={emailHTML} readOnly />
+            </details>
+          </CardContent></Card>
+
+            </TabsContent>
+          </Tabs>
+        </div>
+      )}
     </div>
   );
 }
