@@ -1,4 +1,4 @@
-import React, { useMemo, useState } from "react";
+import React, { useMemo, useState, useEffect, useRef } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -35,9 +35,9 @@ function Field({ label, children }) {
       </div>
 
       {splitView ? (
-        <div className="grid grid-cols-12 gap-4">
-          {/* Left: 25% options (tabs without preview) */}
-          <div className="col-span-12 lg:col-span-3 space-y-3">
+        <div ref={containerRef} className="flex gap-4 items-stretch">
+          {/* Left: resizable options */}
+          <div className="space-y-3 min-w-[260px] max-w-[600px]" style={{width: `${splitWidth}%`}}>
             <Tabs defaultValue="content" className="w-full">
               <TabsList>
                 <TabsTrigger tab="content">Content</TabsTrigger>
@@ -169,35 +169,17 @@ function Field({ label, children }) {
             </Tabs>
           </div>
 
-          {/* Right: 75% preview */}
-          <div className="col-span-12 lg:col-span-9">
+          {/* Divider */}
+          <div
+            onMouseDown={startDrag}
+            className="w-1.5 cursor-col-resize bg-slate-200 hover:bg-slate-300 rounded self-stretch"
+            style={{userSelect: 'none'}}
+            title="Drag to resize"
+          ></div>
 
-          <Card className="mt-3"><CardContent className="space-y-4 pt-4">
-            <div className="flex flex-wrap items-center gap-2">
-              <div className="inline-flex rounded-2xl bg-slate-100 p-1 gap-1">
-                <button onClick={()=>setPreviewMode("desktop")} className={`px-3 py-1.5 text-sm rounded-xl ${previewMode==='desktop'?'bg-white shadow':'text-slate-600'}`}>Desktop 600px</button>
-                <button onClick={()=>setPreviewMode("mobile")} className={`px-3 py-1.5 text-sm rounded-xl ${previewMode==='mobile'?'bg-white shadow':'text-slate-600'}`}>Mobile ~390px</button>
-              </div>
-              <div className="flex gap-2 ml-auto">
-                <Button onClick={() => navigator.clipboard.writeText(emailHTML)}>Copy HTML</Button>
-                <Button variant="secondary" onClick={() => dl("hyundai-email.html", emailHTML)}>Download .html</Button>
-              </div>
-            </div>
+          {/* Right: preview flexes to fill */}
+          <div className="flex-1">
 
-            <div className="rounded-2xl overflow-hidden border shadow bg-white mx-auto" style={{width: previewMode==='mobile' ? 390 : 620}}>
-              <div className="bg-slate-50 text-xs text-slate-600 px-3 py-1 border-b">Preview width: {previewMode==='mobile' ? '390px' : '620px (container 600px + padding)'}</div>
-              <iframe title="preview" className="w-full h-[800px]" srcDoc={emailHTML} />
-            </div>
-
-            <details>
-              <summary className="cursor-pointer text-sm text-slate-600">Show raw HTML</summary>
-              <Textarea className="mt-2 font-mono" rows={14} value={emailHTML} readOnly />
-            </details>
-          </CardContent></Card>
-
-          </div>
-        </div>
-      ) : (
         <div>
           <Tabs defaultValue="content" className="w-full">
             <TabsList>
@@ -558,6 +540,29 @@ export default function EmailBuilder() {
   const [showShoppingTools, setShowShoppingTools] = useState(true);
   const [previewMode, setPreviewMode] = useState("desktop"); // desktop or mobile
   const [splitView, setSplitView] = useState(true); // show 25% options / 75% preview
+  const [splitWidth, setSplitWidth] = useState(30); // left pane width in %
+  const [dragging, setDragging] = useState(false);
+  const containerRef = useRef(null);
+  const startDrag = (e) => { setDragging(true); e.preventDefault(); };
+  useEffect(() => {
+    function onMove(e){
+      if(!dragging) return;
+      const el = containerRef.current;
+      if(!el) return;
+      const rect = el.getBoundingClientRect();
+      const x = e.clientX - rect.left;
+      let pct = (x / rect.width) * 100;
+      pct = Math.max(20, Math.min(60, pct));
+      setSplitWidth(pct);
+    }
+    function onUp(){ setDragging(false); }
+    window.addEventListener("mousemove", onMove);
+    window.addEventListener("mouseup", onUp);
+    return () => {
+      window.removeEventListener("mousemove", onMove);
+      window.removeEventListener("mouseup", onUp);
+    };
+  }, [dragging]);
 
   const emailHTML = useMemo(() => {
     const groups = [];
