@@ -5,8 +5,10 @@ export function Tabs({ defaultValue, children, className='' }) {
     {React.Children.map(children, child => React.cloneElement(child, { value, setValue }))}
   </div>
 }
-export function TabsList({ children }) {
-  return <div className="inline-flex rounded-2xl bg-slate-100 p-1 gap-1">{children}</div>
+export function TabsList({ children, value, setValue }) {
+  return <div className="inline-flex rounded-2xl bg-slate-100 p-1 gap-1">
+    {React.Children.map(children, child => React.cloneElement(child, { value, setValue }))}
+  </div>
 }
 export function TabsTrigger({ children, tab, value, setValue }) {
   const active = value===tab

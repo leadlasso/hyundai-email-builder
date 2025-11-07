@@ -157,7 +157,14 @@ export default function App() {
       pct = Math.max(20, Math.min(60, pct));
       setSplitWidth(pct);
     }
-    function onUp(){ setDragging(false); }
+    function onUp(){ 
+      if(dragging){
+        setDragging(false); 
+        const snaps = [25, 33, 40];
+        const nearest = snaps.reduce((a,b)=> Math.abs(b - splitWidth) < Math.abs(a - splitWidth) ? b : a, snaps[0]);
+        setSplitWidth(nearest);
+      }
+    }
     window.addEventListener("mousemove", onMove);
     window.addEventListener("mouseup", onUp);
     return () => {
