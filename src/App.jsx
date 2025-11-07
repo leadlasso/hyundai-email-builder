@@ -142,6 +142,7 @@ export default function App() {
 
   // Preview + layout
   const [previewMode, setPreviewMode] = useState("desktop"); // desktop or mobile
+  const [previewWidth, setPreviewWidth] = useState(620); // px: controls iframe width
   const [splitView, setSplitView] = useState(true);
   const [splitWidth, setSplitWidth] = useState(30); // %
   const [dragging, setDragging] = useState(false);
@@ -335,8 +336,16 @@ export default function App() {
     <Card className="mt-3"><CardContent className="space-y-4 pt-4">
       <div className="flex flex-wrap items-center gap-2">
         <div className="inline-flex rounded-2xl bg-slate-100 p-1 gap-1">
-          <button onClick={()=>setPreviewMode("desktop")} className={`px-3 py-1.5 text-sm rounded-xl ${previewMode==='desktop'?'bg-white shadow':'text-slate-600'}`}>Desktop 600px</button>
-          <button onClick={()=>setPreviewMode("mobile")} className={`px-3 py-1.5 text-sm rounded-xl ${previewMode==='mobile'?'bg-white shadow':'text-slate-600'}`}>Mobile ~390px</button>
+          <select className="ml-2 border border-slate-300 rounded-lg px-2 py-1 bg-white text-xs" value={String(previewWidth)} onChange={(e)=>setPreviewWidth(parseInt(e.target.value,10))}>
+            <option value="320">320</option>
+            <option value="360">360</option>
+            <option value="375">375</option>
+            <option value="390">390</option>
+            <option value="414">414</option>
+            <option value="600">600</option>
+          </select>
+          <button onClick={()=>{setPreviewMode("desktop"); setPreviewWidth(620);}} className={`px-3 py-1.5 text-sm rounded-xl ${previewMode==='desktop'?'bg-white shadow':'text-slate-600'}`}>Desktop 600px</button>
+          <button onClick={()=>{setPreviewMode("mobile"); setPreviewWidth(390);}} className={`px-3 py-1.5 text-sm rounded-xl ${previewMode==='mobile'?'bg-white shadow':'text-slate-600'}`}>Mobile ~390px</button>
         </div>
         <div className="flex gap-2 ml-auto">
           <Button onClick={() => navigator.clipboard.writeText(emailHTML)}>Copy HTML</Button>
@@ -344,8 +353,8 @@ export default function App() {
         </div>
       </div>
 
-      <div className="rounded-2xl overflow-hidden border shadow bg-white mx-auto" style={{width: previewMode==='mobile' ? 390 : 620}}>
-        <div className="bg-slate-50 text-xs text-slate-600 px-3 py-1 border-b">Preview width: {previewMode==='mobile' ? '390px' : '620px (container 600px + padding)'}</div>
+      <div className="rounded-2xl overflow-hidden border shadow bg-white mx-auto" style={{width: previewWidth}}>
+        <div className="bg-slate-50 text-xs text-slate-600 px-3 py-1 border-b">Preview width: {previewWidth + 'px'}</div>
         <iframe title="preview" className="w-full h-[800px]" srcDoc={emailHTML} />
       </div>
 
@@ -392,8 +401,7 @@ export default function App() {
     >
       <option value="25">25%</option>
       <option value="50">50%</option>
-      <option value="75">75%</option>
-    </select>
+          </select>
   </div>
 </div>
 
